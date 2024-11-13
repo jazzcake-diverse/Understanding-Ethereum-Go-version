@@ -1,33 +1,36 @@
-# Account and Contract：账户与合约
+# Account and Contract：계정 및 계약
 
-## 概述
+## 개요
 
-我们常常听到这样一个说法，"Ethereum 和 Bitcoin 最大的不同之一是二者使用链上数据模型不同。其中，Bitcoin 是基于 UTXO 模型的 Blockchain/Ledger 系统，Ethereum是基于 Account/State 模型的系统"。那么，Account/State 模型相比于 UTXO 究竟不同在何处呢？在本文，我们就来探索一下以太坊中的基本数据结构之一的 `Account`。
+"이더리움과 비트코인의 가장 큰 차이점 중 하나는 서로 다른 온체인 데이터 모델을 사용한다는 점입니다.비트코인은 UTXO 모델을 기반으로 하는 블록체인/원장 시스템인 반면, 이더리움은 계정/스테이트 모델을 기반으로 합니다."라는 말을 자주 듣습니다.그렇다면 계정/스테이트 모델과 UTXO의 차이점은 무엇일까요?이번 아티클에서는 이더리움의 기본 데이터 구조 중 하나인 `Account`에 대해 살펴보겠습니다.
 
-简单的来说，Ethereum 的运行是一种*基于交易的状态机模型*(Transaction-based State Machine)。整个系统由若干的账户组成 (Account)，类似于银行账户。状态(State)反应了某一账户(Account)在*某一时刻*下的值(value)。在以太坊中，State 对应的基本数据结构，称为 StateObject。当 StateObject 的值发生了变化时，我们称为*状态转移*。在 Ethereum 的运行模型中，StateObject 所包含的数据会因为 Transaction 的执行引发数据更新/删除/创建，引发状态转移，我们说：StateObject 的状态从当前的 State 转移到另一个 State。
+간단히 말해, 이더리움은 *거래 기반 상태 머신*(Transaction-based State Machine)으로 작동합니다.이 시스템은 은행 계좌와 유사한 여러 개의 계정으로 구성됩니다. 스테이트는 특정 시점의 계정 가치를 반영합니다. 이더리움에서는 스테이트에 해당하는 기본 데이터 구조를 스테이트 오브젝트라고 하며, 스테이트 오브젝트의 값이 변경될 때 이를 *스테이트 전송*이라고 합니다. 이더리움의 운영 모델에서 스테이트 오브젝트에 포함된 데이터는 트랜잭션의 결과로 업데이트/삭제/생성되며, 이는 스테이트 전송, 즉 현재 스테이트에서 다른 스테이트로 스테이트 오브젝트의 상태를 전송하는 것을 트리거합니다.
 
-在 Ethereum 中，承载 StateObject 的具体实例就是 Ethereum 中的 Account 。通常，我们提到的 State 具体指的就是 Account 在某个时刻下所包含的数据的值。
+이더리움에서 스테이트 오브젝트를 호스팅하는 특정 인스턴스는 이더리움의 계정입니다.일반적으로 스테이트는 특정 시점에 계정에 포함된 데이터의 값을 가리킵니다.
 
 - Account --> StateObject
 - State   --> The value/data of the Account
 
-总的来说, Account (账户) 是参与链上交易(Transaction) 的基本角色，是 Ethereum 状态机模型中的基本单位，承担了链上交易的发起者以及接收者的角色。目前，在以太坊中，有两种类型的 Account，分别是外部账户 (EOA) 以及合约账户(Contract)。
+일반적으로 계정은 체인에서 트랜잭션의 기본 역할이며, 이더리움 상태 머신 모델의 기본 단위로, 체인에서 트랜잭션의 개시자와 수신자 역할을 모두 맡습니다.현재 이더리움에는 두 가지 유형의 계정, 즉 외부 계정(EOA)과 콘트랙트가 있습니다.
 
-外部账户(EOA)是由用户直接控制的账户，负责签名并发起交易(Transaction)。用户通过控制 Account 的私钥来保证对账户数据的控制权。
+외부 계정(EOA)은 사용자가 직접 제어하며 거래(트랜잭션)의 서명 및 시작을 담당하는 계정입니다.사용자는 계정의 개인 키를 제어하여 계정 데이터에 대한 통제권을 확보합니다.
 
-合约账户(Contract)，简称为合约，是由外部账户通过 Transaction 创建的。合约账户保存了**不可篡改的图灵完备的代码段**，以及一些**持久化的数据变量**。这些代码使用专用的图灵完备的编程语言编写(Solidity)，并通常提供一些对外部访问 API 接口函数。这些 API 接口函数可以通过构造 Transaction，或者通过本地/第三方提供的节点 RPC 服务来调用。这种模式构成了目前的 DApp 生态的基础。
+컨트랙트라고 하는 계약 계정(컨트랙트)은 트랜잭션을 통해 외부 계정에 의해 생성됩니다.컨트랙트 계정은 **변조 방지 튜링 완전 코드 세그먼트**와 일부 **영구 데이터 변수**를 보유합니다.이 코드는 특수한 튜링 완전 프로그래밍 언어(솔리디티)로 작성되며, 일반적으로 API 인터페이스 기능에 대한 일부 외부 액세스를 제공합니다.이러한 API 인터페이스 함수는 트랜잭션을 구성하거나 로컬/서드파티가 제공하는 노드 RPC 서비스를 통해 호출할 수 있습니다.이 모델은 현재 디앱 생태계의 근간을 이루고 있습니다.
 
-通常，合约中的函数用于计算以及查询或修改合约中的持久化数据。我们经常看到这样的描述"**一旦被记录到区块链上数据不可被修改**，或者**不可篡改的智能合约**"。现在我们知道这种笼统的描述其实是不准确。针对一个链上的智能合约，不可修改/篡改的部分是合约中的代码段，或说合约中的*函数逻辑*/*代码逻辑是*不可以被修改/篡改的。而合约中的**持久化的数据变量**是可以通过调用代码段中的函数进行数据操作的(CURD)。具体的操作方式取决于合约函数中的代码逻辑。
+일반적으로 콘트랙트의 함수는 콘트랙트의 영구 데이터를 계산하고 쿼리하거나 수정하는 데 사용됩니다."**블록체인에 한 번 기록된 데이터는 수정할 수 없다**" 또는 "**변조 방지 스마트 컨트랙트**"와 같은 설명을 종종 볼 수 있습니다.하지만 이러한 일반적인 설명은 사실 부정확하다는 것을 알고 있습니다.온체인 스마트 콘트랙트의 경우, 수정/변조가 불가능한 부분은 콘트랙트의 코드 세그먼트이거나, 콘트랙트의 *기능적 로직*/*코드 로직이 수정/변조가 *불가능*한 부분입니다.그리고 컨트랙트의 **영구 데이터 변수**는 코드 세그먼트에서 함수를 호출하여 데이터를 조작할 수 있습니다(CURD).정확한 조작은 컨트랙트 함수의 코드 로직에 따라 달라집니다.
 
 根据*合约中函数是否会修改合约中持久化的变量*，合约中的函数可以分为两种: *只读函数*和*写函数*。如果用户**只**希望查询某些合约中的持久化数据，而不对数据进行修改的话，那么用户只需要调用相关的只读函数。调用只读函数不需要通过构造一个 Transaction 来查询数据。用户可以通过直接调用本地节点或者第三方节点提供的 RPC 接口来直接调用对应的合约中的*只读函数*。如果用户需要对合约中的数据进行更新，那么他就要构造一个 Transaction 来调用合约中相对应的*写函数*。注意，每个 Transaction 每次调用一个合约中的一个*写函数*。因为，如果想在链上实现复杂的逻辑，需要将*写函数*接口化，在其中调用更多的逻辑。
+컨트랙트의 함수가 컨트랙트 내의 영구적인 변수를 수정하는지 여부에 따라, 컨트랙트의 함수는 두 가지로 분류될 수 있습니다: 읽기 전용 함수와 쓰기 함수입니다. 사용자가 오직 일부 컨트랙트의 영구 데이터를 조회하고 데이터를 수정하지 않으려는 경우, 관련된 읽기 전용 함수만 호출하면 됩니다. 읽기 전용 함수를 호출할 때는 데이터를 조회하기 위해 트랜잭션을 생성할 필요가 없습니다. 사용자는 로컬 노드나 제3자 노드에서 제공하는 RPC 인터페이스를 통해 해당 컨트랙트의 읽기 전용 함수를 직접 호출할 수 있습니다.
 
-关于如何编写合约，以及 Ethereum 的执行层如何解析 Transaction 并调用对应的合约中函数，我们会在后面的文章中详细的进行解析。
+만약 사용자가 컨트랙트 내의 데이터를 업데이트해야 한다면, 해당 컨트랙트의 쓰기 함수를 호출하기 위해 트랜잭션을 생성해야 합니다. 주의할 점은, 각 트랜잭션은 한 번에 하나의 컨트랙트에서 하나의 쓰기 함수만 호출한다는 것입니다. 이는 온체인에서 복잡한 로직을 구현하려면 쓰기 함수를 인터페이스화하여 그 안에서 더 많은 로직을 호출해야 하기 때문입니다.
+
+컨트랙트을 어떻게 작성하는지, 그리고 Ethereum의 실행 레이어가 트랜잭션을 어떻게 해석하고 해당 컨트랙트의 함수를 호출하는지에 대해서는 이후의 글에서 자세히 분석하겠습니다.
 
 ## StateObject, Account, Contract：状态、账户、合约
 
 ### 概述
 
-在实际代码中，这两种 Account 都是由 `stateObject` 这一数据结构定义的。`stateObject`的相关代码位于*core/state/state_object.go*文件中，隶属于*package state*。我们摘录了 `stateObject` 的结构代码，如下所示。通过下面的代码，我们可以观察到，`stateObject`是由小写字母开头。根据 go 语言的特性，我们可以知道这个结构主要用于 package 内部数据操作，并不对外暴露。
+실제 코드에서 이 두 종류의 Account는 `stateObject`라는 데이터 구조에 의해 정의됩니다. `stateObject`의 관련 코드는 core/state/state_object.go 파일에 위치하며, package state에 속해 있습니다. 우리는 `stateObject`의 구조 코드를 아래와 같이 발췌했습니다. 아래의 코드를 통해 `stateObject`가 소문자로 시작한다는 것을 관찰할 수 있습니다. Go 언어의 특성상, 이 구조체는 주로 패키지 내부의 데이터 조작에 사용되며 외부에는 공개되지 않습니다.
 
 ```go
   type stateObject struct {
@@ -41,7 +44,7 @@
     trie Trie // storage trie, which becomes non-nil on first access
     code Code // contract bytecode, which gets set when code is loaded
 
-    // 这里的Storage 是一个 map[common.Hash]common.Hash
+    // 여기 저장소는 map[common.Hash]common.Hash입니다.
     originStorage  Storage // Storage cache of original entries to dedup rewrites, reset for every transaction
     pendingStorage Storage // Storage entries that need to be flushed to disk, at the end of an entire block
     dirtyStorage   Storage // Storage entries that have been modified in the current transaction execution
@@ -58,7 +61,7 @@
 
 ### Address：地址
 
-在 `stateObject` 这一结构体中，开头的两个成员变量为 `address` 以及 address 的哈希值 `addrHash`。`address`是common.Address类型，`addrHash` 是 common.Hash 类型，它们分别对应了一个**20字节**长的byte类型数组和一个32字节长的byte类型数组。关于这两种数据类型的定义如下所示。
+`stateObject` 구조체에서, 처음 두 개의 멤버 변수는 address와 주소의 해시 값인 addrHash입니다. address는 common.Address 타입이고, addrHash는 common.Hash 타입입니다. 이들은 각각 20바이트 길이의 바이트 배열과 32바이트 길이의 바이트 배열에 해당합니다. 이 두 가지 데이터 타입의 정의는 다음과 같습니다.
 
 ```go
 // Lengths of hashes and addresses in bytes.
@@ -74,11 +77,11 @@ type Address [AddressLength]byte
 type Hash [HashLength]byte
 ```
 
-在Ethereum中，每个 Account 都拥有独一无二的地址。Address 作为每个 Account 的身份信息，类似于现实生活中的身份证，它与用户信息时刻绑定而且不能被修改。
+이더리움에서 각 Account는 고유한 주소(Address)를 가지고 있습니다. Address는 각 Account의 신원 정보로서 현실 생활의 신분증과 유사하며, 사용자 정보와 항상 연결되어 변경할 수 없습니다.
 
 ### data and StateAccount：数据与状态账户
 
-继续向下探索，我们会遇到成员变量 `data`，它是一个 `types.StateAccount` 类型的变量。在上面的分析中我们提到，`stateObject`这种类型只对 Package State 这个内部使用。所以相应的，Package State 也为外部 Package API 提供了与Account 相关的数据类型 `State Account`。在上面的代码中我们就可以看到，`State Account` 对应了 `State Object` 中 `data Account` 成员变量。State Account 的具体数据结构的被定义在 `core/types/state_account.go` 文件中(~~在之前的版本中Account的代码位于core/account.go~~)，其定义如下所示。
+계속해서 탐색해보면, 우리는 멤버 변수 `data`를 만나게 되는데, 이는 `types.StateAccount` 타입의 변수입니다. 앞서의 분석에서 우리는 `stateObject` 타입이 Package State 내부에서만 사용된다고 언급했습니다. 이에 따라 Package State는 외부 패키지 API에 Account와 관련된 데이터 타입인 `State Account`를 제공합니다. 위의 코드에서 우리는 `State Accoun`t가 `State Object`의 `data Account` 멤버 변수에 대응한다는 것을 볼 수 있습니다. State Account의 구체적인 데이터 구조는 c`ore/types/state_account.go` 파일에 정의되어 있습니다(~~이전 버전에서는 Account의 코드가 core/account.go에 위치했습니다~~). 그 정의는 다음과 같습니다.
 
 ```go
 // Account is the Ethereum consensus representation of accounts.
@@ -91,43 +94,50 @@ type StateAccount struct {
 }
 ```
 
-其中的包含四个变量为:
+그 안에는 네 개의 변수가 포함되어 있습니다:
 
-- Nonce 表示该账户发送的交易序号，随着账户发送的交易数量的增加而单调增加。每次发送一个交易，Nonce 的值就会加1。
-- Balance 表示该账户的余额。这里的余额指的是链上的 Native Token Ether (以太)。
-- Root 表示当前账户的下 Storage 层的 Merkle Patricia Trie的 Root。这里的存储层是为了管理合约中持久化变量准备的。对于 EOA账户这个部分为空值。
-- CodeHash 是该账户的 Contract 代码的哈希值。同样的，这个变量是用于保存合约账户中的代码的 hash ，EOA账户这个部分为空值。
+- Nonce는 해당 계정이 보낸 거래의 시퀀스 번호를 나타내며, 계정이 보낸 거래 수의 증가에 따라 단조롭게 증가합니다. 거래를 한 번 보낼 때마다 Nonce의 값은 1씩 증가합니다.
+- Balance는 해당 계정의 잔액을 나타냅니다. 여기서 잔액은 체인상의 네이티브 토큰인 이더(Ether)를 의미합니다.
+- Root는 현재 계정의 하위 스토리지 계층에 있는 머클 패트리샤 트리(Merkle Patricia Trie)의 루트를 나타냅니다. 이 스토리지 계층은 계약의 영구적인 변수를 관리하기 위해 준비된 것입니다. EOA 계정의 경우 이 부분은 빈 값(null)입니다.
+- CodeHash는 해당 계정의 계약 코드의 해시 값입니다. 마찬가지로, 이 변수는 계약 계정의 코드의 해시를 저장하는 데 사용되며, EOA 계정의 경우 이 부분은 빈 값(null)입니다.
 
-### db：数据库
+### db：포괄적인 데이터베이스
 
-上述的几个成员变量基本覆盖了 Account 主生命周期相关的全部成员变量。那么我们继续向下看，会遇到`db`和`dbErr`这两个成员变量。db这个变量保存了一个 `StateDB` 类型的指针。这是为了方便调用 `StateDB` 相关的API对Account所对应的 `stateObject` 进行操作。StateDB 本质上是用于管理`stateObject` 信息的而抽象出来的内存数据库。所有的 Account 数据的更新，检索都会使用 StateDB 提供的 API。关于 StateDB 的具体实现，功能，以及如何与更底层物理存储层(leveldb)进行结合的，我们会在之后的文章中进行详细描述。
+위에서 언급한 몇 가지 멤버 변수들은 기본적으로 Account 주요 라이프사이클과 관련된 모든 멤버 변수를 포함합니다. 그러면 계속해서 아래로 내려가면 `db`와 `dbErr` 이 두 멤버 변수를 만나게 됩니다. `db` 변수는 `StateDB` 타입의 포인터를 저장하고 있습니다. 이는 Account에 대응하는 `stateObject`를 조작하기 위해 StateDB 관련 API를 호출하기 편리하게 하기 위한 것입니다. 본질적으로 StateDB는 stateObject 정보를 관리하기 위해 추상화된 인메모리 데이터베이스입니다. 모든 Account 데이터의 업데이트와 조회는 StateDB에서 제공하는 API를 사용하게 됩니다. StateDB의 구체적인 구현, 기능, 그리고 더 하위의 물리적 스토리지 계층(leveldb)과 어떻게 결합하는지에 대해서는 이후의 글에서 자세히 설명하겠습니다.
 
-### Cache：缓存
+### Cache：캐시
 
-对于剩下的成员变量，它们的主要用于内存缓存。trie 用于保存和管理合约账户中的持久化变量存储的数据，code 用于缓存合约中的代码段到内存中，它是一个 byte 类型的数组。剩下的四个 Storage 字段主要在执行 Transaction 的时候缓存合约修改的持久化数据，比如 dirtyStorage 就用于缓存在 Block 被 Finalize 之前，Transaction 所修改的合约中的持久化存储数据。对于外部账户，由于没有代码字段，所以对应 stateObject 对象中的code 字段，以及四个 Storage 类型的字段对应的变量的值都为空(originStorage, pendingStorage, dirtyStorage, fakeStorage)。
+남아있는 멤버 변수들은 주로 메모리 캐싱에 사용됩니다. trie는 계약 계정의 영구적인 변수 저장 데이터를 저장하고 관리하는 데 사용됩니다. code는 계약의 코드 섹션을 메모리에 캐시하는 데 사용되며, 이는 byte 타입의 배열입니다. 남은 네 개의 Storage 필드는 주로 트랜잭션을 실행할 때 계약이 수정한 영구적인 데이터를 캐시하는 데 사용됩니다. 예를 들어, dirtyStorage는 블록이 최종 확정되기 전에 트랜잭션이 수정한 계약의 영구 저장 데이터를 캐시하는 데 사용됩니다. 외부 계정의 경우 코드 필드가 없기 때문에, 해당하는 stateObject 객체의 code 필드와 네 개의 Storage 타입 필드에 대응하는 변수들의 값은 모두 비어 있습니다(originStorage, pendingStorage, dirtyStorage, fakeStorage).
 
-从调用关系上看，这四个缓存变量的修改顺序是: originStorage --> dirtyStorage--> pendingStorage。关于合于中的 Storage 层的详细信息，我们会在后面部分进行详细的描述。
+호출 관계 측면에서 보면, 이 네 개의 캐시 변수의 수정 순서는 다음과 같습니다: originStorage --> dirtyStorage --> pendingStorage. 계약의 Storage 계층에 대한 자세한 정보는 이후 부분에서 상세히 설명하겠습니다.
 
-## 深入 Account (EOA)
+## 심화 Account (EOA)
 
-### 谁掌握了你的账户
+### 누가 당신의 계정을 지배하는가
 
-我们经常会在各种科技网站/自媒体上看到这样的说法，"用户在区块链系统中保存的 Cryptocurrency/Token，除了用户自己，不存在第三方可以不经过用户的允许转走你的财富"。这个说法基本是正确的。目前，用户账户里的由链级别定义的 Crypto/Token，或者称为原生货币(Native Token)，比如Ether，Bitcoin，BNB(Only in BSC)，是没办法被第三方在不被批准的情况下转走的。这是因为链级别上的所有数据的修改都要执行由用户私钥(Private Key)签名的 Transaction。因此，只要用户保管好自己账户的私钥(Private Key)，保证其没有被第三方知晓，就没有人可以转走你链上的财富。
+우리는 다양한 기술 웹사이트나 미디어에서 다음과 같은 말을 자주 접합니다. "사용자가 블록체인 시스템에 보관한 암호화폐/토큰은 사용자 자신을 제외하고는, 사용자의 허락 없이 제3자가 당신의 자산을 옮길 수 없다." 이 말은 기본적으로 맞습니다. 현재, 사용자 계정에 있는 체인 레벨에서 정의된 암호화폐/토큰, 즉 네이티브 토큰(Native Token)이라고 불리는 것들, 예를 들어 이더(Ether), 비트코인(Bitcoin), BNB(바이낸스 스마트 체인에서만 사용 가능)는 사용자의 승인 없이 제3자가 옮길 수 없습니다. 이는 체인 레벨의 모든 데이터 변경은 사용자의 개인 키(Private Key)로 서명된 트랜잭션을 실행해야 하기 때문입니다. 따라서 사용자가 자신의 계정의 개인 키를 잘 보관하고, 제3자가 알지 못하도록 한다면, 아무도 당신의 체인 상의 자산을 옮길 수 없습니다.
 
-我们说上述说法是基本正确，而不是完全正确。原因有两个。首先，用户的链上数据安全是基于当前 `Go-ethereum` 中使用的密码学工具足够保证：不存在第三方可以在**有限的时间**内在**不知道用户私钥的前提**下获取到用户的私钥信息来伪造签名交易。这个安全保证前提是当今Ethereum使用的密码学工具的强度足够大，没有计算机可以在有限的时间内 hack 出用户的私钥信息。在量子计算机出现之前，目前 Ethereum 和其他 Blockchain 使用的密码学工具的强度都是足够安全的。这也是为什么很多新的区块链项目在研究抗量子计算机密码体系的原因。第二点原因是，当今很多的所谓的 Crypto/Token 并不是链级别的代币，而是保存在合约中持久化变量中的数据，比如 ERC-20 Token 和 NFT对应的 ERC-721 的 Token。由于这部分的 Token 都是基于合约代码生成和维护的，所以这部分 Token 的安全依赖于合约本身的安全。如果合约本身的代码是有问题的，存在后门或者漏洞，比如存在给第三方任意提取其他账户下 Token 的漏洞。那么即使用户的私钥信息没有泄漏，合约中的Token仍然可以被第三方获取到。由于合约的代码段在链上是不可修改的，因此合约代码的安全性是极其重要的。目前有很多研究人员，技术团队在进行合约审计方面的工作，来保证上传的合约代码是安全的。随着Layer-2技术和一些跨链技术的发展，用户持有的 `Token` ，在很多情况下并不是我们上面提到的由私钥来保证安全的 Naive Token，而是 ERC-20 Token。这种 Token 只是合约中的简单数值记录。这种类型的资产的安全性是远低于低于 layer-1 上的 Native Token 的。用户在持有这类资产的时候需要小心。这里我们推荐阅读 Jay Freeman 所分析的关于一个热门 Layer-2 系统Optimism上 的由于非 Naive Token 造成的[任意提取漏洞](https://www.saurik.com/optimism.html)。
 
-### Account Generation：账户生成
+우리는 위의 말이 기본적으로 맞지만, 완전히 정확하지는 않다고 말했습니다. 그 이유는 두 가지입니다.
 
-首先，EOA账户的创建分为本地创建和链上注册两个部分。当我们使用诸如 Metamask 等钱包工具创建账户的时候，在区块链上并没有同步注册账户信息。链上账户的创建和管理都是通过 `StateDB` 模块来操作的，因此我们将 `geth` 中账户管理部分的代码整合到 `StateDB` 模块章节来一起讲述。而合约账户，或者说智能合约的创建是需要通过 EOA 账户构造特定的交易生成的。关于这部分的细节我们也放在之后的章节中进行解析。
+첫째, 사용자의 온체인 데이터 보안은 현재 `Go-ethereum`에서 사용하는 암호학 도구가 충분히 보장된다는 것에 기반합니다. 즉, 사용자의 프라이빗 키를 알지 못하는 전제 하에서, 제3자가 유한한 시간 내에 사용자의 프라이빗 키 정보를 얻어 서명된 트랜잭션을 위조할 수 없다는 것입니다. 이 보안 보장의 전제는 현재 이더리움에서 사용하는 암호학 도구의 강도가 충분히 커서, 어떤 컴퓨터도 유한한 시간 내에 사용자의 프라이빗 키를 해킹할 수 없다는 것입니다. 양자 컴퓨터가 등장하기 전까지, 현재 이더리움과 다른 블록체인에서 사용하는 암호학 도구의 강도는 모두 충분히 안전합니다. 이것이 많은 새로운 블록체인 프로젝트가 양자 컴퓨터에 대응하는 암호 체계를 연구하는 이유이기도 합니다.
 
-下面我们简单分析一下，如何在本地创建一个 EOA 账户的。
+둘째, 현재 많은 이른바 암호화폐/토큰이 체인 레벨의 토큰이 아니라 계약의 영구 변수에 저장된 데이터입니다. 예를 들어 ERC-20 토큰과 NFT에 해당하는 ERC-721 토큰이 그렇습니다. 이러한 토큰들은 모두 계약 코드 기반으로 생성되고 유지되기 때문에, 이 토큰들의 안전성은 계약 자체의 안전성에 의존합니다. 만약 계약 코드에 문제가 있어 백도어나 취약점이 존재한다면, 예를 들어 제3자가 다른 계정의 토큰을 임의로 추출할 수 있는 취약점이 있다면, 사용자의 프라이빗 키 정보가 유출되지 않았더라도 계약 내의 토큰은 여전히 제3자에게 탈취될 수 있습니다. 계약의 코드 섹션은 체인상에서 수정할 수 없기 때문에, 계약 코드의 안전성은 매우 중요합니다. 현재 많은 연구자들과 기술 팀들이 계약 감사를 진행하여 업로드된 계약 코드의 안전성을 보장하고 있습니다.
 
-总的来说，创建新账户的依赖的入口函数 `NewAccount` 位于 `accounts/keystore/keystore.go` 文件中。函数有一个 string 类型的 passphrase 参数。注意，这个参数仅用于加密本地保存私钥的Keystore文件，与生成账户的私钥，地址的生成都无关。
+레이어 2 기술과 일부 크로스체인 기술의 발전에 따라, 사용자가 보유한 `토큰`은 많은 경우 우리가 앞서 언급한 프라이빗 키로 안전이 보장되는 네이티브 토큰이 아니라 ERC-20 토큰입니다. 이러한 토큰은 계약 내의 간단한 수치 기록에 불과합니다. 이러한 유형의 자산의 안전성은 레이어 1 상의 네이티브 토큰보다 훨씬 낮습니다. 사용자는 이러한 자산을 보유할 때 주의해야 합니다. 여기에서 우리는 Jay Freeman이 분석한 인기 있는 레이어 2 시스템인 Optimism에서 네이티브 토큰이 아닌 것으로 인해 발생한 임의 추출 취약점을 읽어볼 것을 권장합니다. (https://www.saurik.com/optimism.html)
+
+### Account Generation：계정 생성
+
+먼저, EOA 계정의 생성은 로컬 생성과 온체인 등록 두 부분으로 나뉩니다. 우리가 Metamask와 같은 지갑 도구를 사용하여 계정을 생성할 때, 블록체인에 계정 정보가 동기화되어 등록되는 것은 아닙니다. 온체인 계정의 생성과 관리는 모두 `StateDB` 모듈을 통해 이루어지므로, 우리는 `geth`의 계정 관리 부분 코드를 `StateDB` 모듈 챕터에 통합하여 함께 설명하겠습니다. 그리고 계약 계정, 즉 스마트 컨트랙트의 생성은 EOA 계정을 통해 특정한 트랜잭션을 구성하여 생성해야 합니다. 이 부분의 세부 사항에 대해서도 이후의 챕터에서 분석하도록 하겠습니다.
+
+이제 로컬에서 EOA 계정을 어떻게 생성하는지 간단히 분석해보겠습니다.
+
+일반적으로, 새로운 계정을 생성하는 데 의존하는 진입 함수 `NewAccount`는 `accounts/keystore/keystore.go` 파일에 위치해 있습니다. 이 함수는 문자열 타입의 passphrase 파라미터를 가지고 있습니다. 주의할 점은, 이 파라미터는 로컬에 저장된 프라이빗 키의 키스토어 파일을 암호화하는 데만 사용되며, 계정의 프라이빗 키와 주소의 생성과는 무관하다는 것입니다.
 
 ```go
-// passphrase 参数用于本地加密
+// passphrase 매개변수는 로컬 암호화에 사용됨
 func (ks *KeyStore) NewAccount(passphrase string) (accounts.Account, error) {
-//生成account的函数
+//계정을 생성하는 함수
  _, account, err := storeNewKey(ks.storage, crand.Reader, passphrase)
  if err != nil {
   return accounts.Account{}, err
@@ -140,7 +150,7 @@ func (ks *KeyStore) NewAccount(passphrase string) (accounts.Account, error) {
 }
 ```
 
-上述代码段中，最核心的调用是 `storeNewKey` 函数。在 `storeNewKey` 函数中，首先就调用了 `newKey` 函数，该函数的主要功能就是生成一个账户需要的私钥和公钥对。而 `newKey` 函数的核心是调用了生成椭圆曲线加密对相关的函数 `ecdsa.GenerateKey`。
+위의 코드 단락에서 가장 핵심적인 호출은 `storeNewKey` 함수입니다. `storeNewKey` 함수에서는 먼저 `newKey` 함수를 호출하는데, 이 함수의 주요 기능은 계정에 필요한 비밀키와 공개키 쌍을 생성하는 것입니다. 그리고 `newKey` 함수의 핵심은 타원 곡선 암호화 쌍을 생성하는 관련 함수인 `ecdsa.GenerateKey`를 호출하는 것입니다.
 
 ```go
 func newKey(rand io.Reader) (*Key, error) {
@@ -153,58 +163,59 @@ func newKey(rand io.Reader) (*Key, error) {
 
 ```
 
-这部分的代码位于 `crypto/ecdsa.go` 文件中。由于这一部分涉及到了大量的椭圆曲线加密的知识，与以太坊的主要业务关系不大，因此对于这部分的内容，我们仅简述主要流程。对于密码学原理的部分在此我们不进行详细说明，感兴趣的读者可以自行搜索。值得注意的时候，在整个流程中，首先生成的是账户的私钥，而账户对应的地址，是基于该私钥在椭圆曲线上对用的公钥值经过哈希计算得到的。
-下面我们简述一下，如何从账户私钥计算出账户地址的。
+이 부분의 코드는 `crypto/ecdsa.go` 파일에 위치해 있습니다. 이 부분은 타원 곡선 암호화에 대한 많은 지식을 포함하고 있으며, 이더리움의 주요 비즈니스와 큰 관련이 없기 때문에, 여기서는 주요 흐름만 간단히 설명하겠습니다. 암호학 원리에 대한 자세한 내용은 여기서 다루지 않으며, 관심 있는 독자께서는 직접 찾아보시기 바랍니다. 주목할 것은, 전체 과정에서 먼저 생성되는 것은 계정의 프라이빗 키이며, 계정에 대응하는 주소는 해당 프라이빗 키를 기반으로 타원 곡선에서 얻은 퍼블릭 키 값을 해시 계산하여 얻어진다는 점입니다.
 
-- 首先，我们在创建一个新的 EOA 账户的时候，首先会通过 `GenerateKey` 函数随机的得到一串私钥，它是一个 32bytes 长的变量，表现为64位16进制数。这个私钥就是平时需要用户激活钱包时，发送交易时必要的门禁卡，一旦这个私钥暴露了，钱包也将不再安全。
-  - 64个16进制位，256bit，32字节
+다음은 계정 프라이빗 키로부터 계정 주소를 계산하는 방법을 간단히 설명하겠습니다.
+
+- 첫째, 새로운 EOA 계정을 생성할 때 `GenerateKey` 함수를 통해 무작위로 프라이빗 키 한 줄을 얻습니다. 이는 32바이트 길이의 변수로, 64자리 16진수로 표현됩니다. 이 프라이빗 키는 사용자가 지갑을 활성화하거나 거래를 보낼 때 필요한 필수적인 열쇠이며, 이 프라이빗 키가 노출되면 지갑은 더 이상 안전하지 않습니다.
+  - 64자리 16진수, 256비트, 32바이트
     `var AlicePrivateKey = "289c2857d4598e37fb9647507e47a309d6133539bf21a8b9cb6df88fd5232032"`
-- 在得到私钥后，我们使用私钥来计算公钥和地址地址。基于上述私钥，我们使用 ECDSA 算法，选择 spec256k1 曲线进行计算。通过将私钥带入到所选择的椭圆曲线中，计算出点的坐标即是公钥。以太坊和比特币使用了同样的 spec256k1 曲线，在实际的代码中，我们也可以看到在 go-Ethereum 直接调用了比特币的 secp256k1 的C语言代码。
+- 둘째, 프라이빗 키를 얻은 후, 이를 사용하여 퍼블릭 키와 주소를 계산합니다. 앞서의 프라이빗 키를 기반으로, ECDSA 알고리즘에서 secp256k1 곡선을 선택하여 계산합니다. 선택한 타원 곡선에 프라이빗 키를 대입하여 점의 좌표를 계산하면 퍼블릭 키가 됩니다. 이더리움과 비트코인은 동일한 secp256k1 곡선을 사용하며, 실제 코드에서 go-Ethereum이 비트코인의 secp256k1 C 언어 코드를 직접 호출하는 것을 볼 수 있습니다.
     `ecdsaSK, err := crypto.ToECDSA(privateKey)`
-- 对私钥进行椭圆加密之后，我们可以得到一个 64bytes 的数，它是由两个 32bytes 的数构成，这两个数代表了 spec256k1 曲线上某个点的 XY 坐标值。
+- 셋째, 프라이빗 키를 타원 곡선 암호화를 수행한 후, 64바이트의 숫자를 얻을 수 있으며, 이는 두 개의 32바이트 숫자로 구성됩니다. 이 두 숫자는 secp256k1 곡선 상의 한 점의 X, Y 좌표를 나타냅니다.
     `ecdsaPK := ecdsaSK.PublicKey`
-- 最终账户的地址，是基于上述公钥(ecdsaSK.PublicKey)进行 **Keccak-256算法** 计算之后得到的哈希值的后20个字节，用0x开头表示(Keccak-256 是 SHA-3（Secure Hash Algorithm 3）标准下的一种哈希算法)。
+- 마지막으로, 계정 주소는 앞서의 퍼블릭 키(ecdsaSK.PublicKey)를 기반으로 ``Keccak-256` 알고리즘을 사용하여 해시 계산을 한 후, 그 결과의 마지막 20바이트를 취하고, 0x를 앞에 붙여 표시합니다(Keccak-256은 SHA-3(Secure Hash Algorithm 3) 표준의 하나인 해시 알고리즘입니다).
     `addr := crypto.PubkeyToAddress(ecdsaSK.PublicKey)`
 
-#### Signature & Verification：签名与验证
+#### Signature & Verification：서명과 검증
 
-这里我们简述一下，怎么利用 ECDSA 来进行数字签名和校验的。
+여기에서 우리는 ECDSA를 이용하여 디지털 서명과 검증을 어떻게 수행하는지 간단히 설명하겠습니다.
 
 - Hash（m,R）*X +R = S* P
-- P是椭圆曲线函数的基点(base point) 可以理解为一个 P 是一个在曲线 C 上的一个 order 为n的加法循环群的生成元，n 是一个大质数。
+- P는 타원 곡선 함수의 기준점(base point)입니다. 이는 곡선 C 위에서 차수가 n인 덧셈 순환군의 생성원으로 이해할 수 있으며, n은 큰 소수입니다.
 - R = r * P (r 是个随机数，并不告知verifier)
-- 以太坊签名校验的核心思想是:首先基于上面得到的ECDSA 下的私钥 ecdsaSK对数据 msg 进行签名 (sign) 得到 msgSig.
+- 이더리움 서명 검증의 핵심 아이디어는 먼저 위에서 얻은 ECDSA의 개인 키 ecdsaSK로 데이터 msg를 서명하여 msgSig를 얻는 것입니다.
     `sig, err := crypto.Sign(msg[:], ecdsaSK)`
     `msgSig := decodeHex(hex.EncodeToString(sig))`
-- 然后基于 msg 和 msgSig 可以反推出来签名的公钥（用于生成账户地址的公钥ecdsaPK）。
+- 그런 다음 msg와 msgSig를 기반으로 서명에 사용된 공개 키(계정 주소를 생성하는 데 사용되는 공개 키 ecdsaPK)를 역으로 추출할 수 있습니다.
     `recoveredPub, err := crypto.Ecrecover(msg[:],msgSig)`
-- 通过反推出来的公钥可以得到发送者的地址，并与当前交易的发送者在 ECDSA 下的pk进行对比。
+- 역으로 추출한 공개 키를 통해 발신자의 주소를 얻을 수 있으며, 현재 거래의 발신자의 ECDSA 공개 키와 비교할 수 있습니다.
     `crypto.VerifySignature(testPk, msg[:], msgSig[:len(msgSig)-1])`
-- 这套体系的安全性保证在于，即使知道了公钥 ecdsaPk/ecdsaSK.PublicKey也难以推测出 ecdsaSK以及生成他的 privateKey。
+- 이 시스템의 보안은 공개 키 ecdsaPK 또는 ecdsaSK.PublicKey를 알고 있더라도 ecdsaSK 및 그것을 생성한 privateKey를 추측하기 어렵다는 데 기반합니다.
 
-#### ECDSA & spec256k1：运算中的曲线
+#### ECDSA & spec256k1：연산에 사용되는 곡선
 
-最后，我们来简述一下 ECDSA 的原理。感兴趣的读者可以以此为切入点自行搜索。
+마지막으로, ECDSA의 원리를 간단히 설명하겠습니다. 관심 있는 독자께서는 이를 출발점으로 삼아 직접 찾아보실 수 있습니다.
 
-- spec256k1 的解析函数 y^2 = x^3 +7
-- 在椭圆曲线上的有一类特殊的计算称为 Elliptic curve point multiplication, 它的计算规则如下
+- spec256k1 해석 함수는 y^2 = x^3 +7 입니다.
+- 타원 곡선 상에는 타원 곡선 점 곱셈(Elliptic curve point multiplication)이라고 불리는 특별한 계산이 있으며, 그 계산 규칙은 다음과 같습니다:
   - Point addition P + Q = R
   - Point doubling P + P = 2P
-- 在ECC中的+号不是四则运算中的加法，而是定义椭圆曲线C上的新的二元运算(Point Multiplication)。他代表了过两点P和Q的直线与椭圆曲线C的交点R‘关于X轴对称的点R。因为C是关于X轴对称的所以关于X对称的点也都在椭圆曲线上。
-- Based Point P是在椭圆曲线上的群的生成元
-- x次computation on Based Point得到X点，x为私钥，X为公钥。x由Account Private Key得出。
+- ECC에서의 '+' 기호는 일반적인 사칙연산의 덧셈이 아니라, 타원 곡선 C 위에서 정의된 새로운 이항 연산(점 곱셈)입니다. 이는 두 점 P와 Q를 지나는 직선이 타원 곡선 C와 만나는 또 다른 점 𝑅′의 X축 대칭인 점 R을 나타냅니다. C는 X축에 대하여 대칭이므로, X축 대칭의 점들도 모두 타원 곡선 위에 있습니다.
+- 기준점 P는 타원 곡선 위에서 군의 생성원입니다.
+- 기준점 P에 x번의 연산을 수행하여 점 X를 얻으며, 여기서 x는 프라이빗 키, X는 퍼블릭 키입니다. x는 계정의 프라이빗 키로부터 얻어집니다.
 
-## Contract：合约和合约存储
+## Contract：계약과 계약 저장소
 
-- 这部分的示例代码位于: [[example/signature](example/signature)]中。
+- 이 부분의 예제 코드는 다음 위치에 있습니다: [[example/signature](example/signature)]中。
 
-### Contract Storage：合约存储
+### Contract Storage：계약 저장소
 
-<!-- TODO: 这部分未来会整合到EVM章节中 -->
+<!-- TODO: 이 부분은 미래에 EVM 챕터로 통합될 것입니다. -->
 
-[在文章的开头](#general Background)我们提到，在外部账户对应的 stateObject 结构体的实例中，有四个 Storage 类型的变量是空值。那显然的，这四个变量是为Contract类型的账户准备的。
+[글의 서두에서](#general Background) 우리는 외부 계정에 대응하는 `stateObject` 구조체의 인스턴스에서 네 개의 `Storage` 타입 변수가 빈 값(null)이라고 언급했습니다. 이는 분명히 이 네 개의 변수는 `Contract` 타입의 계정을 위해 준비된 것입니다.
 
-在 `state_object.go` 文件的开头部分(41行左右)，我们可以找到 `Storage` 类型的定义。具体如下所示。
+`state_object.go` 파일의 처음 부분(약 41행)에 `Storage` 타입의 정의를 찾을 수 있습니다. 구체적인 내용은 다음과 같습니다. 
 
 ```go
 type Storage map[common.Hash]common.Hash
@@ -219,24 +230,26 @@ HashLength = 32
 type Hash [HashLength]byte
 ```
 
-从数据层面讲，外部账户(EOA)与合约账户(Contract)不同的点在于: 外部账户并没有维护自己的代码(codeHash)以及额外的 Storage 层。相比与外部账户，合约账户额外保存了一个存储层(Storage)用于存储合约代码中持久化的变量的数据。在上文中我们提到，StateObject 结构体中的声明的四个 Storage 类型的变量，就是作为 Contract Storage 层的内存缓存。
+우리는 Storage가 key와 value 모두 `common.Hash` 타입인 map 구조라는 것을 볼 수 있습니다. `common.Hash` 타입은 본질적으로 길이가 32바이트인 byte 타입 배열입니다. `common.Hash` 타입은 `go-ethereum` 코드베이스에서 많이 사용되며, 일반적으로 `Keccak256` 함수의 해시 값과 같이 32바이트 길이의 데이터를 나타냅니다. 이후 여정에서도 자주 등장할 것이며, 그 정의는 `common.type.go` 파일에 있습니다.
 
-在 Ethereum 中，每个合约都维护了自己的*独立*的存储空间，用于保存合约中的持久化变量，我们称为 Storage 层。Storage 层的基本组成单元称为槽 (Slot)。若干个 Slot 按照栈(Stack)的方式顺序集合在一起就构造成了 Storage 层。每个 Slot 的大小是 256 bits，也就是最多保存 `32 bytes` 的数据。作为基本的存储单元，Slot 管理的方式与内存或者HDD中的基本单元的管理方式类似，通过地址索引的方式被上层函数访问。Slot的地址索引的长度同样是32 bytes(256 bits)，寻址空间从 0x0000000000000000000000000000000000000000000000000000000000000000 到 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF。因此，每个Contract的Storage层最多可以保存$2^{256} - 1$个 Slot。也就说在理论状态下，一个 Contract 可以最多保存 $(2^{256} - 1)$ 32 bytes的数据，这是个相当大的数字。
+데이터 측면에서, 외부 계정(EOA)과 계약 계정(Contract)의 차이점은 외부 계정은 자신의 코드(codeHash)와 추가적인 Storage 계층을 유지하지 않는다는 것입니다. 외부 계정에 비해 계약 계정은 추가적으로 Storage 계층을 저장하여 계약 코드에서 영구적인 변수를 저장하는 데 사용합니다. 앞서 우리는 StateObject 구조체에 선언된 네 개의 Storage 타입 변수가 계약의 Storage 계층의 메모리 캐시로 사용된다고 언급했습니다.
 
-为了更好的管理 Storage 层的 Slot 数据，Contract 同样使用 MPT 作为索引来管理 Storage 层的Slot。这里值得注意的是，合约 Storage 层的数据并不会跟随交易一起被打包进入 Block 中。正如我们之前提到的，管理合约账户中 Storage 层 Storage Trie 的根数据被保存在 StateAccount 结构体中的 Root 变量中(它是一个32bytes长的byte数组)。当某个 Contract 的 Storage 层的数据发生变化时，会向上传导，并更新 World State Root 的值，从而影响到Chain链上数据。目前，Storage 层的数据读取和修改是在执行相关 Transaction 的时候，通过调用 EVM 中的两个专用的指令 *OpSload* 和 *OpSstore* 来执行的。关于这两个指令的具体实现原理，我们会在后续的 EVM 章节进行详细的解读。
+이더리움에서 각 계약은 자신의 독립적인 저장 공간을 유지하여 계약의 영구적인 변수를 저장하는 데 사용하며, 이를 Storage 계층이라고 부릅니다. Storage 계층의 기본 구성 단위는 슬롯(Slot)이라고 합니다. 여러 개의 Slot이 스택(Stack) 방식으로 순서대로 모여 Storage 계층을 구성합니다. 각 Slot의 크기는 256비트이며, 최대 32바이트의 데이터를 저장할 수 있습니다. 기본적인 저장 단위로서 Slot의 관리 방식은 메모리나 HDD의 기본 단위 관리 방식과 유사하며, 주소 인덱싱 방식을 통해 상위 함수에서 접근됩니다. Slot의 주소 인덱스 길이도 32바이트(256비트)이며, 주소 공간은 0x0000000000000000000000000000000000000000000000000000000000000000부터 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF까지입니다. 따라서 각 계약의 Storage 계층은 최대 2^256−1개의 Slot을 저장할 수 있습니다. 이는 이론적으로 하나의 계약이 최대 (2^256−1)개의 32바이트 데이터를 저장할 수 있다는 의미로, 상당히 큰 숫자입니다.
 
-我们知道目前 Ethereum 中的大部分合约都通过 Solidity 语言编写。Solidity 做为强类型的图灵完备的语言，支持多种类型的变量。总的来说，根据变量的长度性质，Ethereum 中的持久化的变量可以分为定长的变量和不定长度的变量两种。定长的变量有常见的单变量类型，比如 uint256。不定长的变量包括了由若干单变量组成的 Array，以及 KV 形式的 Map 类型。
+Storage 계층의 Slot 데이터를 더 잘 관리하기 위해 계약은 마찬가지로 MPT(Merkle Patricia Trie)를 인덱스로 사용하여 Storage 계층의 Slot을 관리합니다. 여기서 주목할 점은, 계약 Storage 계층의 데이터는 트랜잭션과 함께 블록에 포함되어 패키징되지 않는다는 것입니다. 앞서 언급했듯이, 계약 계정의 Storage Trie의 루트 데이터 관리는 StateAccount 구조체의 Root 변수에 저장됩니다(이는 32바이트 길이의 바이트 배열입니다). 특정 계약의 Storage 계층 데이터가 변경되면 상위로 전달되어 World State Root의 값이 업데이트되어 체인 데이터에 영향을 미칩니다. 현재 Storage 계층의 데이터 읽기 및 수정은 관련 트랜잭션을 실행할 때 EVM에서 두 개의 전용 지시어인 OpSload와 OpSstore를 호출하여 수행됩니다. 이 두 지시어의 구체적인 구현 원리에 대해서는 이후 EVM 챕터에서 자세히 해석하겠습니다.
 
-根据上面的介绍，我们了解到对 Contract Storage 层的访问是通过 Slot 的地址来进行的。请读者先思考下面的几个问题:
+우리는 현재 이더리움의 대부분의 계약이 Solidity 언어로 작성된다는 것을 알고 있습니다. Solidity는 강타입의 튜링 완전 언어로, 다양한 타입의 변수를 지원합니다. 일반적으로, 변수의 길이 특성에 따라 이더리움의 영구적인 변수는 고정 길이 변수와 가변 길이 변수 두 가지로 나눌 수 있습니다. 고정 길이 변수에는 흔한 단일 변수 타입인 uint256 등이 있습니다. 가변 길이 변수에는 여러 단일 변수로 구성된 배열(Array)과 키-값 형태의 맵(Map) 타입이 포함됩니다.
 
-- **如何给定一个包含若干持久化存储变量的 Solidity 的合约，EVM 是怎么给其包含的变量分配存储空间的呢？**
-- 怎么保证 Contract Storage 的一致性读写的？(怎么保证每个合约的验证者和执行者都能获取到相同的数据？)
+위의 소개를 통해, 우리는 계약 Storage 계층에 대한 접근이 Slot의 주소를 통해 이루어진다는 것을 알았습니다. 독자들께서는 다음의 몇 가지 질문에 대해 먼저 생각해 보시기 바랍니다:
 
-我们将通过下面的一些实例来展示，在 Ethereum 中，Contract 是如何保存持久化变量的，以及保证所有的参与者都能一致性读写的 Contract 中的数据的。
+- **다수의 퍼시스턴트 스토리지 변수를 포함하는 솔리디티에 대한 컨트랙트가 주어졌을 때, EVM은 어떻게 포함된 변수에 대한 스토리지 공간을 할당하나요?**
+- 컨트랙트 스토리지의 일관된 읽기 및 쓰기를 어떻게 보장하나요?(각 컨트랙트의 유효성 검사기와 실행자가 동일한 데이터를 얻도록 어떻게 보장하나요?)
 
-### 合约存储案例一：Storing Numbers
+아래 몇 가지 예를 통해 이더리움의 컨트랙트가 어떻게 영구 변수를 유지하고 모든 참여자가 컨트랙트의 데이터를 일관되게 읽고 쓸 수 있는지 보여드리겠습니다.
 
-我们使用一个简单的合约来展示 Contract Storage 层的逻辑，合约代码如下所示。在本例中，我们使用了一个叫做 `Storage` 合约，其中定义了了三个持久化 uint256 类型的变量分别是 number, number1, 以及number2。同时，我们定义一个 `stores` 函数给这个三个变量进行赋值。合约代码如下所示。
+### 계약 스토리지 사례 1：Storing Numbers
+
+컨트랙트 스토리지 레이어의 로직을 보여주기 위해 간단한 컨트랙트를 사용하며, 컨트랙트 코드는 아래와 같습니다.이 예시에서는 Storage라는 컨트랙트를 사용하여 number, number1, number2 유형의 세 가지 영구 uint256 변수를 정의하고, 이 세 가지 변수에 값을 할당하는 store 함수를 정의합니다.컨트랙트 코드는 아래와 같습니다.
 
 ```solidity
 // SPDX-License-Identifier: GPL-3.0
@@ -273,9 +286,11 @@ contract Storage {
 }
 ```
 
-我们使用[Remix](https://remix.ethereum.org/)来在本地部署这个合约，并构造一个调用 `stores(1)` 函数的交易，同时使用 Remix debugger 来观察Storage 层的变化。在交易执行之后，合约中三个变量的值将被分别赋给1，2，3。此时，我们观察 Storage 层会发现，存储层增加了三个 Storage Object 。这三个 Storage Object 对应了三个 Slot。所以在本例中，合约增加了三个 Slots 来存储数据。我们可以发现每个 Storage Object 由三个字段组成，分别是一个32 bytes 的 key 字段和 32 bytes 的 value 字段，以及外层的一个32 bytes 的字段。这三个字段在下面的例子中都表现为64位的16进制数(32 Bytes)。
+우리는 Remix(https://remix.ethereum.org/)를 사용하여 이 계약을 로컬에 배포하고, `stores(1)` 함수를 호출하는 트랜잭션을 구성한 다음, Remix 디버거를 사용하여 Storage 계층의 변화를 관찰합니다. 트랜잭션이 실행된 후, 계약의 세 개 변수의 값은 각각 1, 2, 3으로 할당됩니다. 이때 Storage 계층을 관찰하면 세 개의 Storage Object가 추가된 것을 발견할 수 있습니다. 이 세 개의 Storage Object는 세 개의 Slot에 대응합니다. 따라서 이 예제에서 계약은 데이터를 저장하기 위해 세 개의 Slot을 추가로 사용합니다. 우리는 각 Storage Object가 세 개의 필드로 구성되어 있음을 발견할 수 있습니다: 각각 32바이트의 key 필드와 32바이트의 value 필드, 그리고 외부의 32바이트 필드입니다. 이 세 개의 필드는 아래 예제에서 모두 64자리 16진수(32바이트)로 표현됩니다.
 
-下面我们来逐个解释一下这个三个值的实际意义。首先我们观察内部的 Key-Value 对，可以发现下面三个 Storage Object 中 key 的值其实是从0开始的递增整数，分别是0，1，2。它代表了当前 Slot 的地址索引值，或者说该 Slot 在 Storage 层对应的绝对位置(Position)。比如，key 的值为 0 时，它代表整个 Storage 层中的第 1 个 Slot，或者说在1号位置的 Slot，当key等于1时代表 Storage 层中的第2个 Slot，以此类推。每个Storage Object中的value变量，存储了合约中三个变量的值(1,2,3)。而 Storage Object 外层的值则等于 Storage Object 的 key 的值的 sha3 的哈希值。比如，下面例子中的第一个 Storage Object 的外层索引值 `0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563` 是等于 `keccak256(0)` 计算出的值，它代表了第一个Slot position 的 Sha3 的哈希，而 `0xb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf6` 等于 `keccak(1)` 计算出的值。我们在[示例代码](../example/account/main.go)中展示了如何计算的过程。
+이제 이 세 값의 실제 의미를 하나씩 설명하겠습니다. 먼저 내부의 Key-Value 쌍을 관찰하면, 아래 세 개의 Storage Object에서 key의 값이 사실 0부터 시작하는 증가하는 정수임을 알 수 있습니다. 각각 0, 1, 2입니다. 이는 현재 Slot의 주소 인덱스 값을 나타내며, 즉 해당 Slot이 Storage 계층에서 대응하는 **절대 위치(Position)**를 의미합니다. 예를 들어, key의 값이 0이면 Storage 계층 전체에서 첫 번째 Slot을 나타내며, 즉 1번 위치의 Slot입니다. key가 1이면 Storage 계층의 두 번째 Slot을 나타내고, 이와 같이 계속됩니다. 각 Storage Object의 value 변수는 계약의 세 개 변수 값(1, 2, 3)을 저장합니다.
+
+그리고 Storage Object의 외부 값은 Storage Object의 key 값의 sha3 해시 값과 동일합니다. 예를 들어, 아래 예제에서 첫 번째 Storage Object의 외부 인덱스 값 `0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563`는 `keccak256(0)`의 계산 결과와 같으며, 이는 첫 번째 Slot 위치의 Sha3 해시를 나타냅니다. 그리고 `0xb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf6`는 `keccak(1)`의 계산 결과와 같습니다. 우리는 예제 코드에서 계산 과정을 보여주었습니다.
 
 ```json
 {
@@ -294,20 +309,26 @@ contract Storage {
 }
 ```
 
-到这里读者可能已经发现了，在这个 Storage Object 中，外层的索引值其实与 Key 值的关系是一一对应的。换句话说，这两个键值本质上都是关于 Slot 位置的唯一索引。这里我们简单讲述一下这两个值在使用上的区别。Key 值代表了 Slot 在 Storage 层的 Position，这个值会在实际的代码中作为 `stateObject.go/getState()` 以及 `setState()` 函数的参数，用于定位 Slot。如果我们继续深入上面的两个函数，我们就会发现，当内存中不存在该 Slot 的缓存时，`geth` 就会尝试从更底层的数据库中来获取这个 Slot 的值。而正如我们之前提到的，Storage 层使用了一个 MPT的结构作为访问底层数据的索引结构。为了 MPT 树的平衡，这里在具体实现的时候使用了一个 `Secure Trie` 的特殊结构。与常规的 MPT 不同的是，`Secure Trie` 中的节点的 Key 值都是需要 Hash 的。因此当我们使用 `Secure Trie` 来查询/修改需要的数据时，需要使用哈希之后的值作为索引键，具体就是上述例子中的外层 hash 值。具体的关于 Secure Trie 的描述可以参考[Trie](10_tire_statedb.md)这一章节。总结下来，在上层函数 (stateObject) 调用中使用的键值是 Slot 的 Position，在下层的函数(Trie)调用中使用的键值是 Slot 的 Position 的哈希值。
+여기까지 읽으셨다면, 이 Storage Object에서 외부의 인덱스 값과 Key 값의 관계가 일대일로 대응된다는 것을 이미 발견하셨을 것입니다. 다시 말해, 이 두 키 값은 본질적으로 Slot 위치에 대한 유일한 인덱스입니다. 여기서 이 두 값의 사용상의 차이점을 간단히 설명하겠습니다.
+
+Key 값은 Storage 계층에서 Slot의 위치(Position)를 나타냅니다. 이 값은 실제 코드에서 stateObject.go의 getState() 및 setState() 함수의 매개변수로 사용되어 Slot을 지정하는 데 사용됩니다. 위의 두 함수를 더 깊게 살펴보면, 메모리에 해당 Slot의 캐시가 존재하지 않을 때 geth는 더 하위의 데이터베이스에서 이 Slot의 값을 가져오려고 시도한다는 것을 알 수 있습니다.
+
+앞서 언급했듯이, Storage 계층은 하위 데이터를 접근하기 위한 인덱스 구조로 MPT(Merkle Patricia Trie) 구조를 사용합니다. MPT 트리의 균형을 유지하기 위해, 실제 구현에서는 Secure Trie라는 특별한 구조를 사용합니다. 일반적인 MPT와 달리, Secure Trie의 노드의 Key 값은 모두 해시되어야 합니다. 따라서 Secure Trie를 사용하여 필요한 데이터를 조회하거나 수정할 때는 해시된 값을 인덱스 키로 사용해야 하며, 이는 앞서 예제에서의 외부 해시 값에 해당합니다.
+
+Secure Trie에 대한 자세한 설명은 Trie 장을 참고하시기 바랍니다. 요약하면, 상위 함수(stateObject) 호출에서는 키 값으로 Slot의 Position을 사용하고, 하위 함수(Trie) 호출에서는 키 값으로 Slot Position의 해시 값을 사용합니다.
 
 ```go
 func (t *SecureTrie) TryGet(key []byte) ([]byte, error) {
-  // Secure Trie中查询的例子
-  // 这里的key还是Slot的Position
-  // 但是在更下层的Call更下层的函数的时候使用了这个Key的hash值作为查询使用的键值。
+// Secure Trie에서 조회하는 예제
+// 여기서 key는 여전히 Slot의 Position입니다
+// 그러나 더 하위의 함수 호출에서는 이 key의 해시 값을 조회에 사용하는 키 값으로 사용합니다.
   return t.trie.TryGet(t.hashKey(key))
 }
 ```
 
-### 合约存储案例二: Sequence of Storage
+### 계약 스토리지 사례 II: Sequence of Storage
 
-下面我们来看另外的一个例子。在这个例子中，我们调整了一下合约中变量的声明顺序，从(number，number1，number2)调整为(number 2, number 1, number)。合约代码如下所示。
+이번에는 다른 예제를 살펴보겠습니다. 이 예제에서는 계약 내 변수의 선언 순서를 (number, number1, number2)에서 (number2, number1, number)로 조정했습니다. 계약 코드는 아래와 같습니다.
 
 ```solidity
 // SPDX-License-Identifier: GPL-3.0
@@ -344,7 +365,7 @@ contract Storage {
 }
 ```
 
-同样我们还是构造交易来调用合约中的`stores`函数。此时我们可以在 Storage 层观察到不一样的结果。我们发现 number2 这个变量的值被存储在了第一个 Slot 中（Key:"0x0000000000000000000000000000000000000000000000000000000000000000"），而 number 这个变量的值被存储在了第三个 Slot 中 (Key:"0x0000000000000000000000000000000000000000000000000000000000000002")。
+마찬가지로, 우리는 트랜잭션을 생성하여 계약의 `stores` 함수를 호출합니다. 이때 Storage 계층에서 이전과 다른 결과를 확인할 수 있습니다. number2 변수의 값이 첫 번째 Slot에 저장된 반면(Key: "0x0000000000000000000000000000000000000000000000000000000000000000"), number 변수의 값은 세 번째 Slot에 저장된 것을 확인할 수 있습니다(Key: "0x0000000000000000000000000000000000000000000000000000000000000002").
 
 ```json
 {
@@ -363,11 +384,11 @@ contract Storage {
 }
 ```
 
-这个例子可以说明，在 `go-ethereum` 中，变量对应的存储层的 Slot，是按照其在在合约中的声明顺序，从第一个 Slot（position：0）开始分配的。
+이 예제는 `go-ethereum`에서 변수의 저장 계층 Slot이 계약 내 선언 순서에 따라 첫 번째 Slot(position: 0)부터 할당된다는 것을 설명해줍니다.
 
-### 合约存储案例三: Partial Storage
+### 계약 스토리지 사례 3: Partial Storage
 
-我们再考虑另一种情况：声明的三个变量，但只对其中的两个变量进行赋值。具体的来说，我们按照 number，number1，和number2 的顺序声明三个 `uint256` 变量。但是，在函数`stores`中只对 number1 和 number2 进行赋值操作。合约代码如下所示。
+다른 상황도 고려해보겠습니다. 세 개의 변수를 선언하지만, 그 중 두 개의 변수에만 값을 할당하는 경우입니다. 구체적으로는 number, number1, number2 순서로 세 개의 `uint256` 변수를 선언하되, 함수 `stores`에서는 number1과 number2에만 값을 할당합니다. 계약 코드는 다음과 같습니다.
 
 ```solidity
 // SPDX-License-Identifier: GPL-3.0
@@ -402,7 +423,7 @@ contract Storage {
 }
 ```
 
-基于上述合约，我们构造交易并调用`stores`函数，输入参数1，将 number1 和 number2 的值修改为2，和3。在交易执行完成后，我们可以观察到 Storage 层 Slot 的结果如下所示。
+위의 계약을 기반으로, 트랜잭션을 생성하여 `stores` 함수를 호출하고, 입력값을 1로 설정하여 `number1`과 `number2`의 값을 각각 2와 3으로 수정합니다. 트랜잭션이 완료된 후 Storage 계층 Slot의 결과는 다음과 같습니다.
 
 ```json
 {
@@ -417,15 +438,17 @@ contract Storage {
 }
 ```
 
-我们可以观察到，在 `stores` 函数执行后，只对 Storage 层中位置在 1 和 2 位置的两个 Slot 进行了赋值。值得注意的是，在本例中，对于 Slot 的赋值是从 1 号位置 Slot 的开始，而不是 0 号 Slot。这说明对于固定长度的变量，其值的所占用的 Slot 的位置在合约初始化开始的时候就已经分配的。即使变量只是被声明还没有真正的赋值，保存其值所需要的 Slot 也已经被 EVM 分配完毕。而不是在第一次进行变量赋值的时候，进行再对变量所需要的的 Slot 进行分配。
+`stores` 함수 실행 후 Storage 계층에서 위치가 1과 2인 두 개의 Slot에만 값이 할당된 것을 확인할 수 있습니다. 주목할 점은, 이 예제에서 Slot 할당이 0번 Slot이 아닌 1번 Slot부터 시작되었다는 것입니다. 이는 고정 길이 변수가 차지할 Slot 위치가 계약 초기화 시점에서 이미 할당된다는 것을 의미합니다. 변수들이 단순히 선언되었을 뿐 실제로 값이 할당되지 않았더라도, 해당 변수를 저장할 Slot은 EVM에 의해 이미 할당됩니다. 변수에 처음으로 값을 할당할 때 Slot이 새로 할당되는 것이 아니라는 점을 보여줍니다.
 
 ![Remix Debugger](../figs/01/remix.png)
 
-### 合约存储案例四：Multiple Types
+### 계약 스토리지 사례 IV：Multiple Types
 
-在 Solidity 中，有一类特殊的变量类型 **Address**，通常用于表示账户的地址信息。例如在 ERC-20 合约中，用户拥有的 token 信息是被存储在一个(address->uint)的map结构中。在这个 map 中，key就是 Address 类型的，它表示了用户实际的 address 。目前 Address 的大小为 160bits(20bytes)，并不足以填满一整个 Slot。因此当 Address 作为 value 单独存储在的时候，它并不会排他的独占用一个 Slot。我们使用下面的例子来说明。
+Solidity에는 **Address**라는 특별한 변수 유형이 있습니다. 이는 보통 계정의 주소 정보를 나타내는 데 사용됩니다. 예를 들어, ERC-20 계약에서 사용자가 보유한 토큰 정보는 (address -> uint) 형태의 맵 구조에 저장됩니다. 이 맵에서 key는 Address 타입으로, 사용자의 실제 주소를 나타냅니다. 현재 Address의 크기는 160비트(20바이트)로, 한 개 Slot(32바이트)을 가득 채우기에 충분하지 않습니다. 따라서 Address가 단독으로 value로 저장될 때는 Slot을 독점하지 않습니다. 이를 설명하기 위해 아래 예제를 사용합니다.
 
-在下面的示例中，我们声明了三个变量，分别是 number(uint256)，addr(address)，以及 isTrue(bool)。我们知道，在以太坊中 Address 类型变量的长度是20 bytes，所以一个 Address 类型的变量是没办法填满整个的 Slot(32 bytes) 的。同时，布尔类型在以太坊中只需要一个 bit(0 or 1) 的空间. 因此，我们构造 transaction 并调用函数 `storeaddr()` 来给这三个变量赋值，函数的 input 参数是一个 uint25 6的值，一个 address 类型的值，分别为{1, `0xb6186d3a3D32232BB21E87A33a4E176853a49d12`}。
+다음 예제에서는 세 개의 변수를 선언했습니다: number(uint256), addr(address), 그리고 isTrue(bool)입니다. 이더리움에서 Address 타입 변수의 길이는 20바이트이므로, Address 타입 변수는 전체 Slot(32바이트)을 채울 수 없습니다. 또한, 이더리움에서 부울(bool) 타입은 1비트(0 또는 1)만 필요합니다.
+
+이제 트랜잭션을 생성하고 `storeaddr()` 함수를 호출하여 이 세 변수에 값을 할당해보겠습니다. 함수의 입력 매개변수는 하나의 uint256 값과 하나의 address 타입 값으로, 각각 {1, `0xb6186d3a3D32232BB21E87A33a4E176853a49d12`}입니다.
 
 ```solidity
 // SPDX-License-Identifier: GPL-3.0
@@ -460,7 +483,9 @@ contract Storage {
 }
 ```
 
-交易的运行后 Storage 层的结果如下面的 Json 所示。我们可以观察到，在本例中 Contract 声明了三个变量，但是在 Storage 层只调用了两个 Slot。第一个 Slot 用于保存了 uint256 的值，而在第二个 Slot 中(Key:`0x0000000000000000000000000000000000000000000000000000000000000001`)保存了 `addr` 和 `isTrue` 的值。这里需要注意，虽然这种将两个小于 32 bytes 长的变量合并到一个 Slot 的做法节省了物理空间，但是也同样带来读写放大的问题。因为在 `Geth` 中，读操作最小的读的单位都是按照 `32bytes` 来进行的(由于`OpSload`指令的实际调用)。在本例中，即使我们只需要读取`isTrue`或者`addr`这两个变量的值，在具体的函数调用中，我们仍然需要将对应的 Slot 先读取到内存中。同样的，如果我们想修改这两个变量的值，同样需要对整个的 Slot 进行重写。这无疑增加了额外的开销。所以在 Ethereum 使用 32 bytes 的变量，在某些情况下消耗的 Gas 反而比更小长度类型的变量要小(例如 unit8)。这也是为什么 Ethereum 官方也建议使用长度为 32 bytes 变量的原因。
+트랜잭션 실행 후 Storage 계층의 결과는 아래 JSON과 같습니다. 이번 예제에서 계약은 세 개의 변수를 선언했지만, Storage 계층에서는 두 개의 Slot만 사용되었음을 알 수 있습니다. 첫 번째 Slot에는 uint256 값이 저장되어 있고, 두 번째 Slot(Key: `0x0000000000000000000000000000000000000000000000000000000000000001`)에는 `addr`와 `isTrue` 값이 저장되어 있습니다.
+
+여기서 주목할 점은, 32바이트보다 작은 두 변수를 하나의 Slot에 합쳐 저장하는 방식이 물리적 공간을 절약하지만, 동시에 읽기/쓰기 확대 문제를 일으킬 수 있다는 것입니다. `Geth`에서는 읽기 연산의 최소 단위가 `32바이트`(이는 `OpSload` 명령어의 실제 호출에 따른 결과)입니다. 이 예제에서는 `isTrue`나 `addr` 변수 중 하나의 값만 읽고자 할 때에도 해당 Slot 전체를 메모리로 읽어와야 합니다. 마찬가지로 두 변수 중 하나의 값을 변경하고자 할 때에도 전체 Slot을 재기록해야 합니다. 이는 추가적인 비용을 발생시킵니다. 따라서 이더리움에서 32바이트 변수는 경우에 따라 더 작은 변수 타입(예: uint8)보다 가스 소비가 적을 수 있습니다. 이 점이 이더리움에서 32바이트 길이의 변수를 사용하도록 권장하는 이유이기도 합니다.
 
 // Todo Gas cost? here or in EVM Section
 
@@ -477,11 +502,13 @@ contract Storage {
 }
 ```
 
-### 合约存储案例五: Storing Maps
+### 계약 스토리지 사례 V: Storing Maps
 
-对于变长数组和 Map 结构的变量存储分配则相对的复杂。虽然 Map 本身就是 `key-value` 的结构，但是在 Storage 层并不直接使用 map 中 key 的值或者 key 的值的 sha3 哈希值来作为 Storage 分配的 Slot 的索引值。目前，EVM 首先会使用map中元素的key的值和当前Map变量声明位置对应的 slot 的值进行拼接，再使用拼接后的值的 `keccak256` 哈希值作为 Slot 的位置索引(Position)。我们在下面的例子中展示了 Ethereum 是如何处理 map 这种变长的数据结构的。在下面的合约中，我们声明了一个定长的 uint256 类型的对象 number，和一个[string=>uint256]类型的 Map 对象。
+가변 길이 배열과 Map 구조의 변수 저장 할당은 상대적으로 더 복잡합니다. Map은 본질적으로 `key-value` 구조이지만, Storage 계층에서는 map의 key 값이나 key 값의 sha3 해시를 직접 Storage 할당의 Slot 인덱스로 사용하지 않습니다. 현재 EVM에서는 map 요소의 key 값과 해당 Map 변수 선언 위치에 할당된 slot 값을 먼저 연결한 다음, 이 연결된 값의 `keccak256` 해시 값을 Slot의 위치 인덱스(Position)로 사용합니다. 아래 예제에서 이더리움이 Map과 같은 가변 길이 데이터 구조를 어떻게 처리하는지 보여드리겠습니다.
 
-<!-- Todo: 变长数据结构的存储情况。 -->
+다음 계약에서는 고정 길이 uint256 타입의 객체 number와 [`string => uint256`] 타입의 Map 객체를 선언했습니다.
+
+<!-- Todo: 가변 길이 데이터 구조의 저장 사례입니다. -->
 
 ```solidity
 // SPDX-License-Identifier: GPL-3.0
@@ -511,7 +538,9 @@ contract Storage {
 }
 ```
 
-我们构造一个交易来调用 `set_balance` 函数。在交易执行之后的 Storage 层的结果如下面的 Json 所示。我们发现，对于定长的变量 `number` 占据了第一个 Slot 的空间(`Position:0x0000000000000000000000000000000000000000000000000000000000000000`)。但是对于 Map 类型变量 balances，它包含的两个数据并没有按照变量定义的物理顺序来定义 Slot。此外，我们观察到存储这两个值的 Slot 的 key，也并不是这两个字在 mapping 中 key 的直接 hash。正如我们在上段中提到的那样，EVM 会使用 Map 中元素的 key 值与当前 Map 被分配的 Slot 的位置进行拼接，之后对拼接之后对值进行使用`keccak256` 函数求得哈希值，来最终得到 map 中元素最终的存储位置。比如在本例中，按照变量定义的顺序，`balances`这个 Map 变量会被分配到第二个 Slot，对应的 Slot Position 是1。因此，`balances`中的 kv 对分配到的 Slot 的位置就是，`keccak(key, 1)`，这里是一个特殊的拼接操作。
+우리는 `set_balance` 함수를 호출하는 트랜잭션을 구성합니다. 트랜잭션 실행 후 Storage 계층의 결과는 아래 JSON과 같습니다. 여기서, 고정 길이 변수 `number`는 첫 번째 Slot을 차지하고 있습니다(`Position: 0x0000000000000000000000000000000000000000000000000000000000000000`). 그러나 Map 타입 변수 balances가 포함하는 두 데이터는 물리적 순서대로 Slot에 저장되지 않았습니다. 또한, 이 두 값을 저장하는 Slot의 key도 Mapping에서 key의 직접적인 해시 값이 아님을 확인할 수 있습니다.
+
+앞서 언급했듯이, EVM은 Map 요소의 key 값과 Map 변수에 할당된 Slot 위치를 연결하여 생성된 값을 `keccak256` 해시 함수로 계산하여 map 요소의 최종 저장 위치를 결정합니다. 예를 들어, 이 예제에서 `balances`라는 Map 변수는 변수 정의 순서에 따라 두 번째 Slot에 할당되며, 이 Slot의 Position은 1입니다. 따라서 `balances`의 각 key-value 쌍에 대한 Slot 위치는 `keccak(key, 1)`으로 결정됩니다. 여기서 (key, 1)은 특별한 연결 방식으로 결합된 값입니다.
 
 ```json
 {
@@ -530,12 +559,12 @@ contract Storage {
 }
 ```
 
-为了验证上面的说法，我们使用 go 语言编写了一段代码，来调用相关的库来验证一下上面的结论。对于 balances["hsy"]，它被分配的 Slot 的位置可以由下面的代码求得。读者可以阅读/使用[示例代码](../example/account/main.go)进行尝试。这里的 `k1` 是一个整形实数，代表了 Slot 的在 storage 层的位置 (Position)。
+위의 내용을 검증하기 위해 Go 언어로 작성된 코드로 관련 라이브러리를 호출하여 결론을 검증해 보았습니다. 예를 들어, balances["hsy"]에 할당된 Slot 위치는 아래 코드(../example/account/main.go)로 확인할 수 있습니다. 독자께서는 예제 코드를 참고하여 직접 시도해 볼 수 있습니다. 여기서 `k1`은 정수형 값으로, Storage 계층에서 Slot의 위치(Position)를 나타냅니다.
 
 ```go
 k1 := solsha3.SoliditySHA3([]byte("hsy"), solsha3.Uint256(big.NewInt(int64(1))))
 fmt.Printf("Test the Solidity Map storage Key1:         0x%x\n", k1)
 ```
 
-## 总结
-在本章节中，我们简述了 Go-Ethereum 中 Account 这一关键数据结构的一些具体的实现的细节。了解更多的细节可以参照章节阅读相关部分的源代码。
+## 요약
+이번 장에서는 Go-Ethereum에서 Account라는 중요한 데이터 구조의 구현 세부 사항을 간단히 설명했습니다. 추가적인 세부 사항을 알고 싶다면 관련 부분의 소스 코드를 해당 장에서 참고하여 읽어보시기 바랍니다.
